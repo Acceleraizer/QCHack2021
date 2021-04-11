@@ -115,22 +115,5 @@ namespace QCHack.Task4 {
         }
         
     }
-
-    operation TestTask (
-        V : Int, 
-        edges : (Int, Int)[], 
-        colors : Bool[]
-    ) : Unit {
-        let e = Length(edges);
-        // use colorsRegister = Qubit[e];
-        // for (i in 0..e-1) {
-        //     if (colors[i]) {
-        //         X(colorsRegister[i]);
-        //     }
-        // }
-        // use target = Qubit();
-        // Task4_TriangleFreeColoringOracle(V, edges, colorsRegister, target);
-        // DumpMachine();
-    }
 }
 
