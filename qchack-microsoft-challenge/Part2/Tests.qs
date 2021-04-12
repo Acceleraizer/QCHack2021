@@ -20,33 +20,33 @@ namespace QCHack.Part2 {
     // }
 
     operation testRookOracle (rook : Bool[], inputstring : Bool[]) : Unit {
-        using (reg = Qubit[5]) {
-            for (i in 0..3) {
-                if (inputstring[i]) {
-                    X(reg[i]);
-                }
+        use reg = Qubit[5];
+        for i in 0..3 {
+            if (inputstring[i]) {
+                X(reg[i]);
             }
-            RookOracle(rook, reg[0..3], reg[4]);
-            let m = M(reg[4]);
-            ResetAll(reg);
-            Message($"Rook: {rook}, pos: {inputstring}, result: {m}");
         }
+        RookOracle(rook, reg[0..3], reg[4]);
+        let m = M(reg[4]);
+        ResetAll(reg);
+        Message($"Rook: {rook}, pos: {inputstring}, result: {m}");
+        
     }
 
     operation testPhaseOracle (rooks : (Int,Int)[], coords : (Int,Int)) : Unit {
-        using (reg = Qubit[8]) {
-            let coordsB = ConvertRooksToBitString(4, 4, [coords]);
-            for (i in 0..3) {
-                if (coordsB[0][i]) {
-                    X(reg[i]);
-                }
+        use reg = Qubit[8];
+        let coordsB = ConvertRooksToBitString(4, 4, [coords]);
+        for i in 0..3 {
+            if (coordsB[0][i]) {
+                X(reg[i]);
             }
-            let rooksB = ConvertRooksToBitString(4, 4, rooks);
-            
-            PhaseOracle(rooksB, reg[0..3], reg[4..6], reg[7]);
-            let m = M(reg[7]);
-            ResetAll(reg);
-            Message($"Rooks: {rooks}, pos: {coords}, result: {m}");
         }
+        let rooksB = ConvertRooksToBitString(4, 4, rooks);
+        
+        PhaseOracle(rooksB, reg[0..3], reg[4..6], reg[7]);
+        let m = M(reg[7]);
+        ResetAll(reg);
+        Message($"Rooks: {rooks}, pos: {coords}, result: {m}");
+
     }
 }

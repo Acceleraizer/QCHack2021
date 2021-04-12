@@ -18,7 +18,7 @@ namespace QCHack.Part2 {
         X(output);
         // Flip output if input is same column as rook
         within {
-            for (i in 0..1) {
+            for i in 0..1 {
                 if (not rook[i]) {
                     X(inputs[i]);
                 }
@@ -28,7 +28,7 @@ namespace QCHack.Part2 {
         }
         // Flip output if input is same row as rook
         within {
-            for (i in 2..3) {
+            for i in 2..3 {
                 if (not rook[i]) {
                     X(inputs[i]);
                 }
@@ -46,7 +46,7 @@ namespace QCHack.Part2 {
         rookAnc : Qubit[],
         oracleAnc : Qubit
     ) : Unit is Adj {
-        for (r in 0..2) {
+        for r in 0..2 {
             RookOracle(rooksB[r], searchRegister, rookAnc[r]);
         }
         Controlled X(rookAnc, oracleAnc);
@@ -61,7 +61,7 @@ namespace QCHack.Part2 {
         iterations : Int
     ) : Unit is Adj {
         ApplyToEachA(H, searchRegister);
-        for (it in 1..iterations) {
+        for it in 1..iterations {
             phaseOracle(rooksB, searchRegister, rookAnc, oracleAnc);
 
             within {
@@ -78,7 +78,7 @@ namespace QCHack.Part2 {
     // Converts the coordinates of the rooks into a bitstring representation
     function ConvertRooksToBitString (dim : Int, bits : Int, rooks : (Int,Int)[]) : Bool[][] {
         mutable coordinates = new Bool[][0];
-        for ((row, col) in rooks) {
+        for (row, col) in rooks {
             set coordinates += [IntAsBoolArray(row + dim*col, bits)];
         }
         return coordinates;
@@ -98,33 +98,32 @@ namespace QCHack.Part2 {
         // Search register will store coordinates of all candidate safe spots
         // rookAnc will store the results of RookOracle which checks whether a particular rook attacks a cell
         // oracleAnc combines the results from rookAnc - a cell is safe if and only if it is not attacked by any rook
-        using (fullRegister = Qubit[bits+dim]) {
-            let searchRegister = fullRegister[0..bits-1];
-            let rookAnc = fullRegister[bits..bits+dim-2];
-            let oracleAnc = fullRegister[bits+dim-1];
-            Z(oracleAnc);
+        use fullRegister = Qubit[bits+dim];
+        let searchRegister = fullRegister[0..bits-1];
+        let rookAnc = fullRegister[bits..bits+dim-2];
+        let oracleAnc = fullRegister[bits+dim-1];
+        H(oracleAnc);
+        Z(oracleAnc);
 
-            // Convert the coordinates of the rooks into a bitstring
-            let rooksB = ConvertRooksToBitString(dim, bits, rooks);
+        // Convert the coordinates of the rooks into a bitstring
+        let rooksB = ConvertRooksToBitString(dim, bits, rooks);
 
-            // The optimal number of iterations to run Grovers for
-            let iterations = Round(PI() / 4.0 * Sqrt(IntAsDouble(dim*dim)));
-            
-            // Run Grover's algorithm
-            Grover(rooksB, searchRegister, rookAnc, oracleAnc, PhaseOracle, iterations);
-
-            // Check the states of the output
-            DumpRegister((), searchRegister);
-
-            // Measure the amplified state, and convert back into cartesian coordinates.
-            let answer = MultiM(searchRegister);
-            let integerPosition = ResultArrayAsInt(answer);
-            let (row,col) = (integerPosition%dim, integerPosition/dim);
-
-            ResetAll(fullRegister);
-            Message($"The safe spot is on ({row}, {col})");
-            return (row,col);
-        }
+        // The optimal number of iterations to run Grovers for
+        let iterations = Round(PI() / 4.0 * Sqrt(IntAsDouble(dim*dim)));
         
+        // Run Grover's algorithm
+        Grover(rooksB, searchRegister, rookAnc, oracleAnc, PhaseOracle, iterations);
+
+        // Check the states of the output
+        DumpMachine();
+
+        // Measure the amplified state, and convert back into cartesian coordinates.
+        let answer = MultiM(searchRegister);
+        let integerPosition = ResultArrayAsInt(answer);
+        let (row,col) = (integerPosition%dim, integerPosition/dim);
+
+        ResetAll(fullRegister);
+        Message($"The safe spot is on ({row}, {col})");
+        return (row,col);        
     }
 }
