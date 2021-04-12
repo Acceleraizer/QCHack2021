@@ -1,5 +1,6 @@
 import qsharp
 
+from qsharp import Result
 from TestQ import SayHello
 
-SayHello.simulate()
+result = SayHello.simulate()

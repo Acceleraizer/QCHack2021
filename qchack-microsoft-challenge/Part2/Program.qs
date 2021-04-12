@@ -77,7 +77,7 @@ namespace QCHack.Part2 {
 
     // Converts the coordinates of the rooks into a bitstring representation
     function ConvertRooksToBitString (dim : Int, bits : Int, rooks : (Int,Int)[]) : Bool[][] {
-        mutable coordinates = new Bool[][bits];
+        mutable coordinates = new Bool[][0];
         for ((row, col) in rooks) {
             set coordinates += [IntAsBoolArray(row + dim*col, bits)];
         }
@@ -92,35 +92,39 @@ namespace QCHack.Part2 {
         // The board will have length 1 larger than the number of rooks
         let dim = Length(rooks)+1;
         // Number of qubits needed to represent coordinates
-        let bits = Ceiling(Lg(IntAsDouble(dim)));
+        let bits = Ceiling(Lg(IntAsDouble(dim*dim)));
 
         // Initialize qubits
         // Search register will store coordinates of all candidate safe spots
         // rookAnc will store the results of RookOracle which checks whether a particular rook attacks a cell
         // oracleAnc combines the results from rookAnc - a cell is safe if and only if it is not attacked by any rook
-        use searchRegister = Qubit[bits];
-        use rookAnc = Qubit[dim-1];
-        use oracleAnc = Qubit();
-        Z(oracleAnc);
+        using (fullRegister = Qubit[bits+dim]) {
+            let searchRegister = fullRegister[0..bits-1];
+            let rookAnc = fullRegister[bits..bits+dim-2];
+            let oracleAnc = fullRegister[bits+dim-1];
+            Z(oracleAnc);
 
-        // Convert the coordinates of the rooks into a bitstring
-        let rooksB = ConvertRooksToBitString(dim, bits, rooks);
+            // Convert the coordinates of the rooks into a bitstring
+            let rooksB = ConvertRooksToBitString(dim, bits, rooks);
 
-        // The optimal number of iterations to run Grovers for
-        let iterations = Round(PI() / 4.0 * Sqrt(IntAsDouble(dim*dim)));
+            // The optimal number of iterations to run Grovers for
+            let iterations = Round(PI() / 4.0 * Sqrt(IntAsDouble(dim*dim)));
+            
+            // Run Grover's algorithm
+            Grover(rooksB, searchRegister, rookAnc, oracleAnc, PhaseOracle, iterations);
+
+            // Check the states of the output
+            DumpRegister((), searchRegister);
+
+            // Measure the amplified state, and convert back into cartesian coordinates.
+            let answer = MultiM(searchRegister);
+            let integerPosition = ResultArrayAsInt(answer);
+            let (row,col) = (integerPosition%dim, integerPosition/dim);
+
+            ResetAll(fullRegister);
+            Message($"The safe spot is on ({row}, {col})");
+            return (row,col);
+        }
         
-        // Run Grover's algorithm
-        Grover(rooksB, searchRegister, rookAnc, oracleAnc, PhaseOracle, iterations);
-
-        // Check the states of the output
-        DumpMachine();
-
-        // Measure the amplified state, and convert back into cartesian coordinates.
-        let answer = MultiM(searchRegister);
-        let integerPosition = ResultArrayAsInt(answer);
-        let (row,col) = (integerPosition%dim, integerPosition/dim);
-
-        Message($"The safe spot is on ({row}, {col}");
-        return (row,col);
     }
 }
