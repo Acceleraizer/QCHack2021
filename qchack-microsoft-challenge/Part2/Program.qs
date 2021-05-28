@@ -49,7 +49,13 @@ namespace QCHack.Part2 {
         for r in 0..2 {
             RookOracle(rooksB[r], searchRegister, rookAnc[r]);
         }
-        Controlled X(rookAnc, oracleAnc);
+        within {
+            X(oracleAnc);
+            H(oracleAnc);
+        } apply {
+            Controlled X(rookAnc, oracleAnc);
+        }
+       
     }
 
     operation Grover (
@@ -102,8 +108,8 @@ namespace QCHack.Part2 {
         let searchRegister = fullRegister[0..bits-1];
         let rookAnc = fullRegister[bits..bits+dim-2];
         let oracleAnc = fullRegister[bits+dim-1];
-        H(oracleAnc);
-        Z(oracleAnc);
+        // H(oracleAnc);
+        // Z(oracleAnc);
 
         // Convert the coordinates of the rooks into a bitstring
         let rooksB = ConvertRooksToBitString(dim, bits, rooks);
@@ -115,7 +121,7 @@ namespace QCHack.Part2 {
         Grover(rooksB, searchRegister, rookAnc, oracleAnc, PhaseOracle, iterations);
 
         // Check the states of the output
-        DumpMachine();
+        // DumpMachine();
 
         // Measure the amplified state, and convert back into cartesian coordinates.
         let answer = MultiM(searchRegister);
