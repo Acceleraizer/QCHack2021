@@ -50,8 +50,8 @@ namespace QCHack.Part2 {
             RookOracle(rooksB[r], searchRegister, rookAnc[r]);
         }
         within {
-            X(oracleAnc);
-            H(oracleAnc);
+            // X(oracleAnc);
+            // H(oracleAnc);
         } apply {
             Controlled X(rookAnc, oracleAnc);
         }
@@ -108,8 +108,8 @@ namespace QCHack.Part2 {
         let searchRegister = fullRegister[0..bits-1];
         let rookAnc = fullRegister[bits..bits+dim-2];
         let oracleAnc = fullRegister[bits+dim-1];
-        // H(oracleAnc);
-        // Z(oracleAnc);
+        H(oracleAnc);
+        Z(oracleAnc);
 
         // Convert the coordinates of the rooks into a bitstring
         let rooksB = ConvertRooksToBitString(dim, bits, rooks);
