@@ -46,7 +46,7 @@ namespace QCHack.Part2 {
         rookAnc : Qubit[],
         oracleAnc : Qubit
     ) : Unit is Adj {
-        for r in 0..2 {
+        for r in 0..Length(rooksB)-1 {
             RookOracle(rooksB[r], searchRegister, rookAnc[r]);
         }
         within {
@@ -129,7 +129,18 @@ namespace QCHack.Part2 {
         let (row,col) = (integerPosition%dim, integerPosition/dim);
 
         ResetAll(fullRegister);
-        Message($"The safe spot is on ({row}, {col})");
+        // Message($"The safe spot is on ({row}, {col})");
         return (row,col);        
+    }
+
+    operation SolveMultiple (
+        rooks : (Int, Int)[],
+        count : Int
+    ) : (Int,Int)[] {
+        mutable results = new (Int, Int)[0];
+        for i in 0..count-1 {
+            set results += [Solve(rooks)];
+        } 
+        return results;
     }
 }
